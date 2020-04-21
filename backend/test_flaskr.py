@@ -97,17 +97,17 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_get_quizz_question(self):
         res = self.client().post('/quizzes',
-                                 json={"previous_questions": "[]", "quiz_category": {"type": "Geography", "id": 3}})
+                                 json={"previous_questions": [], "quiz_category": {"type": "Sports", "id": 6}})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
 
-    # def test_cget_quizz_question(self):
-    #     res = self.client().post('/quizzes',
-    #                              json={"previous_questions": "[]", "quiz_category": None})
-    #     data = json.loads(res.data)
+    def test_error_get_quizz_question(self):
+        res = self.client().post('/quizzes',
+                                 json={"previous_questions": [], "quiz_category": {"type": "Sports", "id": -1}})
+        data = json.loads(res.data)
 
-    #     self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 500)
 
 
 # Make the tests conveniently executable
