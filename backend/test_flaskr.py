@@ -30,6 +30,41 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
+    def test_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(len(data["categories"]))
+
+    def test_questions(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(len(data["questions"]))
+
+    def test_400_questions(self):
+        res = self.client().get('/questions&page=0')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+
+    def test_delete(self):
+        res = self.client().delete("/questions/1")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], 200)
+
+    def test_create_question(self):
+        res = self.client().post('/questions',
+                                 json={"question": "how many basketball players play in a game?", "answer": "Five", "category": 1, "difficulty": 1})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+
     def test_search_questions(self):
         res = self.client().post('/search/questions',
                                  json={"searchTerm": "title"})
@@ -45,6 +80,32 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         questions = Question.query.filter(
             Question.question.ilike("title"))
+
+        self.assertEqual(res.status_code, 400)
+
+    def test_get_question_by_category_id(self):
+        res = self.client().get("/categories/1/questions")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+
+    def test_400_get_question_by_category_id(self):
+        res = self.client().get("/categories/0/questions")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+
+    def test_get_quizz_question(self):
+        res = self.client().post('/quizzes',
+                                 json={"previous_questions": "[]", "quiz_category": {"type": "Geography", "id": 3}})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+
+    def test_cget_quizz_question(self):
+        res = self.client().post('/quizzes',
+                                 json={"previous_questions": "[]", "quiz_category": None})
+        data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 400)
 
