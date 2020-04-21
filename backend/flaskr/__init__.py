@@ -165,8 +165,8 @@ def create_app(test_config=None):
     @app.route('/categories/<int:id>/questions')
     def get_question_by_category_id(id):
         try:
-            if(id < 0):
-                abort(400)
+            if(id < 1 or id > 6):
+                abort(404)
             category_type = get_category_type(id)
             all_questions = Question.query.all()
             questions = Question.query.filter(
@@ -184,32 +184,28 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=["POST"])
     def get_quizz_question():
-        try:
-            body = request.get_json()
-            previous_questions = body.get("previous_questions")
-            category = body.get("quiz_category")
-            if (previous_questions == None):
-                abort(400)
-            if (category == None):
-                abort(400)
+        body = request.get_json()
+        previous_questions = body.get("previous_questions")
+        category = body.get("quiz_category")
+        if (previous_questions == None):
+            abort(400)
+        if (category == None):
+            abort(400)
 
-            category_id = category['id']
-            if (category['id'] == 0):
-                category_id = random.randint(1, 6)
+        category_id = category['id']
+        if (category['id'] == 0):
+            category_id = random.randint(1, 6)
 
-            random_question = random.choice(
-                Question.query.filter(Question.category == category_id).all())
-            tries = 0
-            max_tries = 100
-            while ((random_question.id in previous_questions) or (tries > max_tries)):
-                random_question = random.choice(Question.query.all())
-                tries += 1
-            else:
-                return jsonify({
-                    "question": random_question.format()
-                })
-        except Exception as e:
-            print(e)
-            abort(500)
+        random_question = random.choice(
+            Question.query.filter(Question.category == category_id).all())
+        tries = 0
+        max_tries = 100
+        while ((random_question.id in previous_questions) or (tries > max_tries)):
+            random_question = random.choice(Question.query.all())
+            tries += 1
+        else:
+            return jsonify({
+                "question": random_question.format()
+            })
 
     return app
